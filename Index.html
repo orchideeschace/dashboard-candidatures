@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Candidatures</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #1B3A4B;
+    --accent: #C47F3A;
+    --stage: #2E7D6B;
+    --emploi: #1B3A4B;
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --text: #1B3A4B;
+    --muted: #8A9BAA;
+    --border: #E8E2D9;
+    --shadow: 0 2px 20px rgba(27,58,75,0.08);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* LOGIN SCREEN */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  .login-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .login-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  .login-label {
+    display: block;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 20px;
+  }
+
+  .login-input:focus {
+    border-color: var(--primary);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .login-btn:hover { background: #152e3c; }
+
+  .login-error {
+    color: #C0392B;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .login-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  /* DASHBOARD */
+  #dashboard {
+    display: none;
+    padding: 32px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .dashboard-header {
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dashboard-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--primary);
+    line-height: 1.1;
+  }
+
+  .dashboard-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .last-update {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .logout-btn {
+    font-size: 12px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .logout-btn:hover {
+    background: var(--card);
+    color: var(--text);
+  }
+
+  .totals-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .total-card {
+    background: var(--primary);
+    border-radius: 16px;
+    padding: 24px 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .total-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .total-card.accent { background: var(--accent); }
+  .total-card.stage-color { background: var(--stage); }
+
+  .total-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 10px;
+  }
+
+  .total-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    line-height: 1;
+  }
+
+  .total-sub {
+    font-size: 12px;
+    opacity: 0.65;
+    margin-top: 6px;
+  }
+
+  .section { margin-bottom: 36px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%; flex-shrink: 0;
+  }
+
+  .section-dot.stage { background: var(--stage); }
+  .section-dot.emploi { background: var(--emploi); }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+  }
+
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .sector-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sector-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(27,58,75,0.12);
+  }
+
+  .sector-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0 0 14px 14px;
+  }
+
+  .sector-card.stage::after { background: var(--stage); }
+  .sector-card.emploi::after { background: var(--emploi); }
+
+  .sector-icon { font-size: 22px; margin-bottom: 12px; }
+
+  .sector-name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .sector-count {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    line-height: 1;
+  }
+
+  .sector-count.stage { color: var(--stage); }
+  .sector-count.emploi { color: var(--emploi); }
+
+  .loading-dot {
+    color: var(--border);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  .table-section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .table-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { background: var(--primary); }
+
+  thead th {
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    text-align: left;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #F9F7F4; }
+
+  tbody td { padding: 14px 18px; font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-stage { background: #E8F5F1; color: var(--stage); }
+  .badge-emploi { background: #E8EEF2; color: var(--emploi); }
+  .badge-traitement { background: #FEF3E2; color: var(--accent); }
+  .badge-complet { background: #E8F5F1; color: var(--stage); }
+  .badge-default { background: var(--bg); color: var(--muted); }
+
+  .empty-row td {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    padding: 30px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN DE CONNEXION -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Adef Résidences</div>
+    <div class="login-sub">Tableau de bord — Candidatures RH</div>
+
+    <label class="login-label">Token Airtable</label>
+    <input
+      type="password"
+      id="tokenInput"
+      class="login-input"
+      placeholder="patXXXXXXXXXXXXXX"
+      autocomplete="off"
+    />
+
+    <button class="login-btn" onclick="connect()">Accéder au tableau de bord</button>
+    <div class="login-error" id="loginError">Token invalide. Vérifiez votre token Airtable.</div>
+
+    <div class="login-hint">
+      Votre token n'est jamais stocké.<br>
+      Il est utilisé uniquement pendant cette session.
+    </div>
+  </div>
+</div>
+
+<!-- TABLEAU DE BORD -->
+<div id="dashboard">
+  <div class="dashboard-header">
+    <div>
+      <div class="dashboard-title">Tableau de bord<br>Candidatures</div>
+      <div class="dashboard-subtitle">Adef Résidences — Maison des Cytises</div>
+    </div>
+    <div class="header-right">
+      <div class="last-update" id="lastUpdate">Chargement...</div>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="totals-row">
+    <div class="total-card">
+      <div class="total-label">Total candidatures</div>
+      <div class="total-number" id="totalAll">–</div>
+      <div class="total-sub">Tous types confondus</div>
+    </div>
+    <div class="total-card stage-color">
+      <div class="total-label">Total stages</div>
+      <div class="total-number" id="totalStages">–</div>
+      <div class="total-sub">Tous secteurs</div>
+    </div>
+    <div class="total-card accent">
+      <div class="total-label">Total emplois</div>
+      <div class="total-number" id="totalEmplois">–</div>
+      <div class="total-sub">Tous secteurs</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot stage"></div>
+      <div class="section-title">Stages par secteur</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="cards-grid">
+      <div class="sector-card stage">
+        <div class="sector-icon">🏛️</div>
+        <div class="sector-name">Direction</div>
+        <div class="sector-count stage" id="stagesDirection"><span class="loading-dot">···</span></div>
+      </div>
+      <div class="sector-card stage">
+        <div class="sector-icon">🏥</div>
+        <div class="sector-name">Soin</div>
+        <div class="sector-count stage" id="stagesSoin"><span class="loading-dot">···</span></div>
+      </div>
+      <div class="sector-card stage">
+        <div class="sector-icon">🍽️</div>
+        <div class="sector-name">Hôtellerie</div>
+        <div class="sector-count stage" id="stagesHotellerie"><span class="loading-dot">···</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot emploi"></div>
+      <div class="section-title">Emplois par secteur</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="cards-grid">
+      <div class="sector-card emploi">
+        <div class="sector-icon">🏛️</div>
+        <div class="sector-name">Direction</div>
+        <div class="sector-count emploi" id="emploisDirection"><span class="loading-dot">···</span></div>
+      </div>
+      <div class="sector-card emploi">
+        <div class="sector-icon">🏥</div>
+        <div class="sector-name">Soin</div>
+        <div class="sector-count emploi" id="emploisSoin"><span class="loading-dot">···</span></div>
+      </div>
+      <div class="sector-card emploi">
+        <div class="sector-icon">🍽️</div>
+        <div class="sector-name">Hôtellerie</div>
+        <div class="sector-count emploi" id="emploisHotellerie"><span class="loading-dot">···</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="table-section-title">Toutes les candidatures</div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Type</th>
+          <th>Statut dossier</th>
+          <th>Contrôle</th>
+        </tr>
+      </thead>
+      <tbody id="candidatsTable">
+        <tr class="empty-row"><td colspan="5">Chargement...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const BASE_ID = 'appYXZj3eZXlNnBH5';
+  const TABLE = 'Candidat';
+  let TOKEN = '';
+
+  const VIEWS = {
+    stagesDirection:   'Stats - Stages Direction',
+    stagesSoin:        'Stats - Stages Soin',
+    stagesHotellerie:  'Stats - Stages H\u00f4tellerie',
+    emploisDirection:  'Stats - Emplois Direction',
+    emploisSoin:       'Stats - Emplois Soin',
+    emploisHotellerie: 'Stats - Emplois H\u00f4tellerie',
+  };
+
+  async function countRecords(viewName) {
+    let count = 0;
+    let offset = null;
+    try {
+      do {
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?view=${encodeURIComponent(viewName)}&fields[]=ID%20Candidat&pageSize=100${offset ? '&offset=' + offset : ''}`;
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+        const data = await res.json();
+        if (data.error) return '?';
+        count += (data.records || []).length;
+        offset = data.offset || null;
+      } while (offset);
+    } catch { return '?'; }
+    return count;
+  }
+
+  async function fetchAllCandidats() {
+    let records = [];
+    let offset = null;
+    try {
+      do {
+        const fields = ['Nom','Pr%C3%A9nom','Type%20de%20candidature','Statut%20dossier','statut%20de%20controle'];
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?${fields.map(f=>'fields[]='+f).join('&')}&pageSize=100${offset ? '&offset=' + offset : ''}`;
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+        const data = await res.json();
+        if (data.error) return [];
+        records = records.concat(data.records || []);
+        offset = data.offset || null;
+      } while (offset);
+    } catch { return []; }
+    return records;
+  }
+
+  function getBadge(value, type) {
+    if (!value || value === '–') return `<span class="badge badge-default">–</span>`;
+    if (type === 'type') return `<span class="badge ${value === 'Stage' ? 'badge-stage' : 'badge-emploi'}">${value}</span>`;
+    if (type === 'statut') {
+      let cls = 'badge-default';
+      if (value.toLowerCase().includes('traitement')) cls = 'badge-traitement';
+      else if (value.toLowerCase() === 'complet') cls = 'badge-complet';
+      return `<span class="badge ${cls}">${value}</span>`;
+    }
+    return `<span class="badge badge-default">${value}</span>`;
+  }
+
+  async function connect() {
+    const input = document.getElementById('tokenInput').value.trim();
+    if (!input) return;
+    TOKEN = input;
+
+    // Test rapide
+    const test = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?pageSize=1`, {
+      headers: { 'Authorization': `Bearer ${TOKEN}` }
+    });
+    const data = await test.json();
+
+    if (data.error) {
+      document.getElementById('loginError').style.display = 'block';
+      TOKEN = '';
+      return;
+    }
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadDashboard();
+  }
+
+  function logout() {
+    TOKEN = '';
+    document.getElementById('tokenInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  async function loadDashboard() {
+    const [sD, sS, sH, eD, eS, eH] = await Promise.all([
+      countRecords(VIEWS.stagesDirection),
+      countRecords(VIEWS.stagesSoin),
+      countRecords(VIEWS.stagesHotellerie),
+      countRecords(VIEWS.emploisDirection),
+      countRecords(VIEWS.emploisSoin),
+      countRecords(VIEWS.emploisHotellerie),
+    ]);
+
+    document.getElementById('stagesDirection').textContent = sD;
+    document.getElementById('stagesSoin').textContent = sS;
+    document.getElementById('stagesHotellerie').textContent = sH;
+    document.getElementById('emploisDirection').textContent = eD;
+    document.getElementById('emploisSoin').textContent = eS;
+    document.getElementById('emploisHotellerie').textContent = eH;
+
+    const ts = [sD,sS,sH].reduce((a,v) => a + (v==='?'?0:v), 0);
+    const te = [eD,eS,eH].reduce((a,v) => a + (v==='?'?0:v), 0);
+    document.getElementById('totalStages').textContent = ts;
+    document.getElementById('totalEmplois').textContent = te;
+    document.getElementById('totalAll').textContent = ts + te;
+
+    const records = await fetchAllCandidats();
+    const tbody = document.getElementById('candidatsTable');
+
+    if (!records.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucun candidat trouvé.</td></tr>';
+    } else {
+      tbody.innerHTML = records.map(r => {
+        const f = r.fields;
+        return `<tr>
+          <td><strong>${f['Nom']||'–'}</strong></td>
+          <td>${f['Prénom']||'–'}</td>
+          <td>${getBadge(f['Type de candidature']||'–','type')}</td>
+          <td>${getBadge(f['Statut dossier']||'–','statut')}</td>
+          <td>${getBadge(f['statut de controle']||'–','statut')}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = `Mis à jour ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}`;
+  }
+
+  document.getElementById('tokenInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') connect();
+  });
+</script>
+</body>
+</html>
